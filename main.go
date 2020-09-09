@@ -13,11 +13,12 @@ import (
 
 func main() {
 	commands := map[string]command{
-		"attack": attackCmd(),
-		"report": reportCmd(),
-		"plot":   plotCmd(),
-		"encode": encodeCmd(),
-		"dump":   dumpCmd(),
+		"attack":    attackCmd(),
+		"diyAttack": diyAttackCmd(),
+		"report":    reportCmd(),
+		"plot":      plotCmd(),
+		"encode":    encodeCmd(),
+		"dump":      dumpCmd(),
 	}
 
 	fs := flag.NewFlagSet("vegeta", flag.ExitOnError)

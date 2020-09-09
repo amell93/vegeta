@@ -28,7 +28,7 @@ The CSV encoder doesn't write a header. The columns written by it are:
 
    1. Unix timestamp in nanoseconds since epoch
    2. HTTP status code
-   3. Request latency in nanoseconds
+   3. Script latency in nanoseconds
    4. Bytes out
    5. Bytes in
    6. Error

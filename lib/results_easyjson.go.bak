@@ -4,12 +4,11 @@ package vegeta
 
 import (
 	json "encoding/json"
-	http "net/http"
-	time "time"
-
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	http "net/http"
+	time "time"
 )
 
 // suppress unused package warning
@@ -64,10 +63,6 @@ func easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(in *jlexer.Lexer, out *j
 			} else {
 				out.Body = in.Bytes()
 			}
-		case "reqBody":
-			out.ReqBody = string(in.String())
-		case "rspBody":
-			out.RspBody = string(in.String())
 		case "method":
 			out.Method = string(in.String())
 		case "url":
@@ -171,16 +166,6 @@ func easyjsonBd1621b8EncodeGithubComTsenartVegetaV12Lib(out *jwriter.Writer, in 
 		const prefix string = ",\"body\":"
 		out.RawString(prefix)
 		out.Base64Bytes(in.Body)
-	}
-	{
-		const prefix string = ",\"reqBody\":"
-		out.RawString(prefix)
-		out.String(string(in.ReqBody))
-	}
-	{
-		const prefix string = ",\"rspBody\":"
-		out.RawString(prefix)
-		out.String(string(in.RspBody))
 	}
 	{
 		const prefix string = ",\"method\":"

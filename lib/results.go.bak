@@ -33,8 +33,6 @@ type Result struct {
 	BytesIn   uint64        `json:"bytes_in"`
 	Error     string        `json:"error"`
 	Body      []byte        `json:"body"`
-	ReqBody   string        `json:"reqBody"`
-	RspBody   string        `json:"rspBody"`
 	Method    string        `json:"method"`
 	URL       string        `json:"url"`
 	Headers   http.Header   `json:"headers"`

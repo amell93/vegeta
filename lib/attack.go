@@ -36,7 +36,7 @@ const (
 	// DefaultRedirects is the default number of times an Attacker follows
 	// redirects.
 	DefaultRedirects = 10
-	// DefaultTimeout is the default amount of time an Attacker waits for a request
+	// DefaultTimeout is the default amount of time an Attacker waits for a script
 	// before it times out.
 	DefaultTimeout = 30 * time.Second
 	// DefaultConnections is the default amount of max open idle connections per
@@ -129,7 +129,7 @@ func MaxConnections(n int) func(*Attacker) {
 }
 
 // ChunkedBody returns a functional option which makes the attacker send the
-// body of each request with the chunked transfer encoding.
+// body of each script with the chunked transfer encoding.
 func ChunkedBody(b bool) func(*Attacker) {
 	return func(a *Attacker) { a.chunked = b }
 }
@@ -162,7 +162,7 @@ func Proxy(proxy func(*http.Request) (*url.URL, error)) func(*Attacker) {
 }
 
 // Timeout returns a functional option which sets the maximum amount of time
-// an Attacker will wait for a request to be responded to and completely read.
+// an Attacker will wait for a script to be responded to and completely read.
 func Timeout(d time.Duration) func(*Attacker) {
 	return func(a *Attacker) {
 		a.client.Timeout = d
@@ -363,6 +363,8 @@ func (a *Attacker) hit(tr Targeter, name string) *Result {
 	}()
 
 	if err = tr(&tgt); err != nil {
+		d := err.(DiyError)
+		fmt.Println("===========", d.Name)
 		a.Stop()
 		return &res
 	}

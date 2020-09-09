@@ -10,7 +10,7 @@ import (
 // Metrics holds metrics computed out of a slice of Results which are used
 // in some of the Reporters
 type Metrics struct {
-	// Latencies holds computed request latency metrics.
+	// Latencies holds computed script latency metrics.
 	Latencies LatencyMetrics `json:"latencies"`
 	// Histogram, only if requested
 	Histogram *Histogram `json:"buckets,omitempty"`
@@ -128,23 +128,23 @@ func (m *Metrics) init() {
 	}
 }
 
-// LatencyMetrics holds computed request latency metrics.
+// LatencyMetrics holds computed script latency metrics.
 type LatencyMetrics struct {
 	// Total is the total latency sum of all requests in an attack.
 	Total time.Duration `json:"total"`
-	// Mean is the mean request latency.
+	// Mean is the mean script latency.
 	Mean time.Duration `json:"mean"`
-	// P50 is the 50th percentile request latency.
+	// P50 is the 50th percentile script latency.
 	P50 time.Duration `json:"50th"`
-	// P90 is the 90th percentile request latency.
+	// P90 is the 90th percentile script latency.
 	P90 time.Duration `json:"90th"`
-	// P95 is the 95th percentile request latency.
+	// P95 is the 95th percentile script latency.
 	P95 time.Duration `json:"95th"`
-	// P99 is the 99th percentile request latency.
+	// P99 is the 99th percentile script latency.
 	P99 time.Duration `json:"99th"`
-	// Max is the maximum observed request latency.
+	// Max is the maximum observed script latency.
 	Max time.Duration `json:"max"`
-	// Min is the minimum observed request latency.
+	// Min is the minimum observed script latency.
 	Min time.Duration `json:"min"`
 
 	estimator estimator

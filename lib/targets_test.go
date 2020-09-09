@@ -27,10 +27,10 @@ func TestTargetRequest(t *testing.T) {
 		URL:    "http://:9999/",
 		Body:   body,
 		Header: http.Header{
-			"X-Some-Header":       []string{"1"},
-			"X-Some-Other-Header": []string{"2"},
-			"X-Some-New-Header":   []string{"3"},
-			"Host":                []string{"lolcathost"},
+			"X-Some-Header":                    []string{"1"},
+			"X-Some-Other-Header":              []string{"2"},
+			"X-Some-NewWeightedControl-Header": []string{"3"},
+			"Host":                             []string{"lolcathost"},
 		},
 	}
 	req, _ := tgt.Request()

@@ -183,7 +183,7 @@ func TestStatusCodeErrors(t *testing.T) {
 	atk := NewAttacker()
 	tr := NewStaticTargeter(Target{Method: "GET", URL: server.URL})
 	res := atk.hit(tr, "")
-	if got, want := res.Error, "400 Bad Request"; got != want {
+	if got, want := res.Error, "400 Bad Script"; got != want {
 		t.Fatalf("got: %v, want: %v", got, want)
 	}
 }

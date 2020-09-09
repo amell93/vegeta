@@ -81,8 +81,9 @@ func (ls *labeledSeries) add(r *vegeta.Result) (err error) {
 	}
 
 	p := point{
-		ts:  ts,
-		seq: r.Seq,
+		ts: ts,
+		//seq: r.Seq,
+		seq: ls.seq, //todo update by amell
 		t:   r.Timestamp,
 		v:   r.Latency.Seconds() * 1000,
 	}
@@ -132,7 +133,7 @@ func Label(l Labeler) Opt {
 	return func(p *Plot) { p.label = l }
 }
 
-// New returns a Plot with the given Opts applied.
+// NewWeightedControl returns a Plot with the given Opts applied.
 // If no Label opt is given, ErrorLabeler will be used as default.
 func New(opts ...Opt) *Plot {
 	p := &Plot{series: map[string]*labeledSeries{}}

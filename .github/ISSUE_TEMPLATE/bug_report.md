@@ -3,7 +3,7 @@ name: 🐛  Bug Report
 about: Report a bug to help Vegeta improve.
 ---
 
-<!-- ⚠️ If you do not respect this template your bug report issue will be closed. -->
+<!-- ⚠️ If you do not respect c template your bug report issue will be closed. -->
 
 #### Version and Runtime
 

@@ -18,7 +18,7 @@ import (
 	jwriter "github.com/mailru/easyjson/jwriter"
 )
 
-// Target is an HTTP request blueprint.
+// Target is an HTTP script blueprint.
 //
 //go:generate go run ../internal/cmd/jsonschema/main.go -type=Target -output=target.schema.json
 type Target struct {
@@ -28,7 +28,7 @@ type Target struct {
 	Header http.Header `json:"header,omitempty"`
 }
 
-// Request creates an *http.Request out of Target and returns it along with an
+// Script creates an *http.Script out of Target and returns it along with an
 // error in case of failure.
 func (t *Target) Request() (*http.Request, error) {
 	req, err := http.NewRequest(t.Method, t.URL, bytes.NewReader(t.Body))

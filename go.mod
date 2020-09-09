@@ -8,6 +8,7 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/dgryski/go-gk v0.0.0-20140819190930-201884a44051
 	github.com/dgryski/go-lttb v0.0.0-20180810165845-318fcdf10a77
+	github.com/go-echarts/go-echarts v1.0.0 // indirect
 	github.com/gonum/blas v0.0.0-20181208220705-f22b278b28ac // indirect
 	github.com/gonum/diff v0.0.0-20181124234638-500114f11e71 // indirect
 	github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82 // indirect

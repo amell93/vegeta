@@ -1,0 +1,111 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"text/template"
+	"time"
+
+	vegeta "github.com/tsenart/vegeta/v12/lib"
+	"github.com/tsenart/vegeta/v12/lib/parameters"
+)
+
+func main() {
+	var req vegeta.Request
+	json.Unmarshal([]byte(input), &req)
+	/*	fmt.Println(req.ParameterFile)
+		fmt.Println(req.Requests[0].Weight)
+		fmt.Println(req.Requests[1].Weight)*/
+
+	rate := vegeta.Rate{Freq: 10, Per: time.Second}
+	duration := 4 * time.Second
+
+	tr := func(req vegeta.Request) vegeta.Targeter {
+
+		var p *parameters.Parameter
+
+		if req.ParameterFile == "" {
+			fmt.Println("parameterFile not exits")
+			os.Exit(1)
+		}
+		p, err := parameters.New(true, req.ParameterFile)
+		if err != nil {
+			fmt.Println("open file failed. err=", err)
+			os.Exit(1)
+		}
+
+		line, err := p.Next()
+		headSli := strings.Split(line, ",")
+
+		urlTmpSli := make([]*template.Template, len(req.Requests))
+		for i := range req.Requests {
+			urlTmp, _ := template.New(fmt.Sprintf("url_%m", i)).Parse(req.Requests[i].Target.URL)
+			urlTmpSli[i] = urlTmp
+		}
+
+		wCon := vegeta.New(&req)
+
+		return func(t *vegeta.Target) error {
+
+			rand := wCon.Rand()
+
+			m := make(map[string]string)
+			data, _ := p.Next()
+			dSli := strings.Split(data, ",")
+			for j, v := range headSli {
+				m[v] = dSli[j]
+			}
+
+			//fmt.Println("m:", m)
+
+			var b bytes.Buffer
+
+			urlTmpSli[rand].Execute(&b, m)
+
+			t.Method = "GET"
+			t.URL = b.String()
+			fmt.Println("t.URL=", t.URL)
+			return nil
+		}
+	}(req)
+
+	attacker := vegeta.NewAttacker(
+		vegeta.Workers(1),
+	)
+
+	var metrics vegeta.Metrics
+	for res := range attacker.Attack(tr, rate, duration, "Big Bang!") {
+		metrics.Add(res)
+	}
+	metrics.Close()
+
+	fmt.Printf("99th percentile: %s\n", metrics.Latencies.P99)
+}
+
+var input = `{
+  "parameterFile": "D:\\myGoProject\\mini-relay\\config\\relays.txt",
+  "requests": [
+    {
+      "weight": 1,
+      "target": {
+        "method": "get",
+        "url": "http://127.0.0.1:8199/resource?relay={{.serverIp}}:443",
+        "header": {
+          "h1": [
+            "v1"
+          ]
+        }
+      }
+    },
+    {
+      "weight": 2,
+      "target": {
+        "method": "get",
+        "url": "http://127.0.0.1:8199/reset?relay={{.serverIp}}"
+      }
+    }
+  ]
+}`

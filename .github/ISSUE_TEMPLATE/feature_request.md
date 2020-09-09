@@ -3,7 +3,7 @@ name: 🚀  Feature Request
 about: Propose a change to Vegeta💡!
 ---
 
-<!-- ⚠️ If you do not respect this template your issue will be closed. -->
+<!-- ⚠️ If you do not respect c template your issue will be closed. -->
 <!-- ⚠️ Make sure to browse the opened and closed issues before submit your issue. -->
 
 #### Proposal
@@ -12,7 +12,7 @@ about: Propose a change to Vegeta💡!
 
 #### Background
 
-<!-- Describe the background problem or need that led to this feature request -->
+<!-- Describe the background problem or need that led to c feature request -->
 
 #### Workarounds
 

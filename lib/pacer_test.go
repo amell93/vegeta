@@ -157,7 +157,7 @@ var qpahm = map[float64][]float64{
 // Helper struct type to make creating SinePacers easier
 type sineTest struct {
 	period int // Period, in seconds
-	mean   int // Mean request rate, in hits/sec
+	mean   int // Mean script rate, in hits/sec
 	amp    int // Amplitude, in hits/sec
 }
 

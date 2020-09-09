@@ -98,7 +98,7 @@ const (
 	Trough = 3 * math.Pi / 2
 )
 
-// SinePacer is a Pacer that describes attack request rates with the equation:
+// SinePacer is a Pacer that describes attack script rates with the equation:
 //   R = MA sin(O+(2𝛑/P)t)
 // Where:
 //   R = Instantaneous attack rate at elapsed time t, hits per nanosecond
@@ -236,7 +236,7 @@ func (sp SinePacer) hits(t time.Duration) float64 {
 	return sp.Mean.hitsPerNs()*float64(t) + sp.ampHits()*(math.Cos(sp.StartAt)-math.Cos(sp.radians(t)))
 }
 
-// LinearPacer paces an attack by starting at a given request rate
+// LinearPacer paces an attack by starting at a given script rate
 // and increasing linearly with the given slope.
 type LinearPacer struct {
 	StartAt Rate
