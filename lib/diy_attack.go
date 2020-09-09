@@ -143,6 +143,8 @@ func (a *Attacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		res.RspBody = string(res.Body)
 
 		res.BytesIn = uint64(len(res.Body))
+
+		res.Headers = r.Header
 	}
 
 	if req.ContentLength != -1 {
@@ -153,7 +155,6 @@ func (a *Attacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		res.Error = r.Status
 	}
 
-	res.Headers = r.Header
 
 	return &res
 }
