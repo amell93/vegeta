@@ -134,7 +134,7 @@ run:
 			}
 		case r, ok := <-res:
 			if !ok {
-				return nil
+				break run
 			}
 
 			if needRecord {
