@@ -51,7 +51,7 @@ const (
 func newDefaultScript() Script {
 	var sc Script
 	sc.MaxWorkers = DefaultMaxWorkers
-	sc.ResultFile = DefaultOutput
+	//sc.ResultFile = DefaultOutput
 	sc.ParameterHeader = make([]string, 0)
 	sc.Rate = DefaultRate
 	sc.Duration = DefaultDuration

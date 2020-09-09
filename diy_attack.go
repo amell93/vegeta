@@ -16,6 +16,7 @@ func diyAttackCmd() command {
 
 	fs.StringVar(&opts.script, "s", "", "the script file")
 	fs.Uint64Var(&opts.every, "every", 0, "report interval")
+	fs.StringVar(&opts.output, "output", "stdout", "output file of the summary result, default is stdout")
 
 	return command{fs, func(args []string) error {
 		fs.Parse(args)
@@ -27,6 +28,7 @@ func diyAttackCmd() command {
 type diyAttackOpts struct {
 	script string
 	every  uint64
+	output string
 }
 
 // attack validates the attack arguments, sets up the
@@ -48,11 +50,30 @@ func diyAttack(opts *diyAttackOpts) (err error) {
 		return fmt.Errorf("duration must be integer	and need greater than 0")
 	}
 
-	out, err := file(sc.ResultFile, true)
+	//output the summary result
+	out, err := file(opts.output, true)
 	if err != nil {
-		return fmt.Errorf("error opening %s: %s", sc.ResultFile, err)
+		return fmt.Errorf("error opening %s: %s", opts.output, err)
 	}
 	defer out.Close()
+
+	//record the result of each request
+
+	var (
+		resultFile *os.File
+		enc        vegeta.Encoder
+	)
+
+	if sc.ResultFile != "" {
+		resultFile, err = file(sc.ResultFile, true)
+		if err != nil {
+			return fmt.Errorf("error opening %s: %s", sc.ResultFile, err)
+		}
+		enc = vegeta.NewJSONEncoder(resultFile)
+		defer resultFile.Close()
+	}
+
+	needRecord := resultFile != nil
 
 	atk := vegeta.NewAttacker(
 		vegeta.Workers(sc.Workers),
@@ -79,8 +100,7 @@ func diyAttack(opts *diyAttackOpts) (err error) {
 		tr, vegeta.ConstantPacer{Freq: sc.Rate, Per: time.Second},
 		time.Duration(sc.Duration)*time.Second, sc.Debug)
 	//enc := vegeta.NewCSVEncoder(out)
-	enc := vegeta.NewJSONEncoder(out)
-	_ = enc
+
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 
@@ -116,9 +136,13 @@ run:
 			if !ok {
 				return nil
 			}
-			/*			if err = enc.Encode(r); err != nil {
-						return err
-					}*/
+
+			if needRecord {
+				if err = enc.Encode(r); err != nil {
+					return err
+				}
+			}
+
 			report.Add(r)
 		}
 	}
