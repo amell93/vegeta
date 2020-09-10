@@ -10,7 +10,7 @@
     {
       "name": "diy1",
       "weight": 1,
-      "keepAlive": false,
+      "disableKeepAlive": false,
       "target": {
         "method": "get",
         "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",
@@ -25,7 +25,7 @@
     {
       "name": "diy2",
       "weight": 2,
-      "keepAlive": true,
+      "disableKeepAlive": false,
       "target": {
         "method": "get",
         "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",

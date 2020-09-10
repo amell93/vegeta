@@ -69,7 +69,7 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 			data.Reset()
 			bufferPool.Put(data)
 
-			return sc.Requests[rand].Name, sc.Requests[rand].KeepAlive, nil
+			return sc.Requests[rand].Name, sc.Requests[rand].DisableKeepAlive, nil
 		}
 	}(script), script
 }

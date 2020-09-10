@@ -151,7 +151,7 @@ func (a *DiyAttacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		}
 	}()
 
-	name, keepAlive, err := tr(&tgt)
+	name, disableKeepAlive, err := tr(&tgt)
 	if err != nil {
 		a.Stop()
 		return &res
@@ -175,9 +175,8 @@ func (a *DiyAttacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		req.Header.Add(k, v[0])
 	}
 
-	//短连接时启用
-
-	if !keepAlive {
+	if disableKeepAlive {
+		//禁用keepAlive
 		req.Header.Add(fasthttp.HeaderConnection, "close")
 	}
 
