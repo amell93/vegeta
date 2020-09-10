@@ -75,10 +75,10 @@ func diyAttack(opts *diyAttackOpts) (err error) {
 
 	needRecord := resultFile != nil
 
-	atk := vegeta.NewAttacker(
-		vegeta.Workers(sc.Workers),
-		vegeta.MaxWorkers(sc.MaxWorkers),
-		vegeta.KeepAlive(true),
+	atk := vegeta.NewDiyAttacker(
+		vegeta.DiyWorkers(sc.Workers),
+		vegeta.DiyMaxWorkers(sc.MaxWorkers),
+		//vegeta.KeepAlive(true),
 	/*		vegeta.Redirects(opts.redirects),
 			vegeta.Timeout(opts.timeout),
 			vegeta.LocalAddr(*opts.laddr.IPAddr),

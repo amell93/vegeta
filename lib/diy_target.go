@@ -44,9 +44,9 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 
 		wCon := NewWeightedControl(sc)
 
-		return func(t *Target) (string, error) {
+		return func(t *Target) (string, bool, error) {
 			if t == nil {
-				return DefaultName, ErrNilTarget
+				return DefaultName, false, ErrNilTarget
 			}
 			m := make(map[string]string)
 			rand := wCon.Rand()
@@ -69,7 +69,7 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 			data.Reset()
 			bufferPool.Put(data)
 
-			return sc.Requests[rand].Name, nil
+			return sc.Requests[rand].Name, sc.Requests[rand].KeepAlive, nil
 		}
 	}(script), script
 }

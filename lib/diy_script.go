@@ -32,6 +32,7 @@ const (
 type Request struct {
 	Name      string     `json:"name"`
 	Weight    int        `json:"weight"`
+	KeepAlive bool       `json:"keepAlive"`
 	DiyTarget *diyTarget `json:"target"`
 	Target    *Target
 }

@@ -1,16 +1,69 @@
 package vegeta
 
 import (
-	"io"
-	"io/ioutil"
+	"crypto/tls"
+	"net"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
-type DiyTargeter func(*Target) (string, error)
+type DiyAttacker struct {
+	dialer     *net.Dialer
+	client     fasthttp.Client
+	stopch     chan struct{}
+	workers    uint64
+	maxWorkers uint64
+	maxBody    int64
+	seqmu      sync.Mutex
+	seq        uint64
+	began      time.Time
+}
 
-func (a *Attacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, debug bool) <-chan *Result {
+func NewDiyAttacker(opts ...func(*DiyAttacker)) *DiyAttacker {
+	a := &DiyAttacker{
+		stopch:     make(chan struct{}),
+		workers:    DefaultWorkers,
+		maxWorkers: DefaultMaxWorkers,
+		maxBody:    DefaultMaxBody,
+		began:      time.Now(),
+	}
+
+	a.client = fasthttp.Client{
+		MaxConnsPerHost: 1000,
+		ReadTimeout:     DefaultTimeout,
+		WriteTimeout:    DefaultTimeout,
+		Dial: func(addr string) (net.Conn, error) {
+			return fasthttp.DialTimeout(addr, 60*time.Second)
+		},
+		TLSConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	return a
+}
+
+// Workers returns a functional option which sets the initial number of workers
+// an Attacker uses to hit its targets. More workers may be spawned dynamically
+// to sustain the requested rate in the face of slow responses and errors.
+func DiyWorkers(n uint64) func(*DiyAttacker) {
+	return func(a *DiyAttacker) { a.workers = n }
+}
+
+// MaxWorkers returns a functional option which sets the maximum number of workers
+// an Attacker can use to hit its targets.
+func DiyMaxWorkers(n uint64) func(*DiyAttacker) {
+	return func(a *DiyAttacker) { a.maxWorkers = n }
+}
+
+type DiyTargeter func(*Target) (string, bool, error)
+
+func (a *DiyAttacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, debug bool) <-chan *Result {
 	var wg sync.WaitGroup
 
 	workers := a.workers
@@ -71,14 +124,14 @@ func (a *Attacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, debug bo
 	return results
 }
 
-func (a *Attacker) diyAttack(tr DiyTargeter, workers *sync.WaitGroup, ticks <-chan struct{}, results chan<- *Result, debug bool) {
+func (a *DiyAttacker) diyAttack(tr DiyTargeter, workers *sync.WaitGroup, ticks <-chan struct{}, results chan<- *Result, debug bool) {
 	defer workers.Done()
 	for range ticks {
 		results <- a.diyHit(tr, debug)
 	}
 }
 
-func (a *Attacker) diyHit(tr DiyTargeter, debug bool) *Result {
+func (a *DiyAttacker) diyHit(tr DiyTargeter, debug bool) *Result {
 	var (
 		res = Result{Attack: DefaultName}
 		tgt Target
@@ -98,7 +151,7 @@ func (a *Attacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		}
 	}()
 
-	name, err := tr(&tgt)
+	name, keepAlive, err := tr(&tgt)
 	if err != nil {
 		a.Stop()
 		return &res
@@ -109,52 +162,59 @@ func (a *Attacker) diyHit(tr DiyTargeter, debug bool) *Result {
 	res.Method = tgt.Method
 	res.URL = tgt.URL
 
-	req, err := tgt.Request()
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req)
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(resp)
+
+	req.SetRequestURI(tgt.URL)
+	req.Header.SetMethod(tgt.Method)
+	req.SetBody(tgt.Body)
+
+	for k, v := range tgt.Header {
+		req.Header.Add(k, v[0])
+	}
+
+	//短连接时启用
+
+	if !keepAlive {
+		req.Header.Add(fasthttp.HeaderConnection, "close")
+	}
+
+	req.Header.Add("X-Vegeta-Attack", DefaultName)
+	req.Header.Add("X-Vegeta-Seq", strconv.FormatUint(res.Seq, 10))
+
+	err = a.client.Do(req, resp)
 	if err != nil {
 		return &res
 	}
-	req.Header.Set("X-Vegeta-Attack", name)
 
-	req.Header.Set("X-Vegeta-Seq", strconv.FormatUint(res.Seq, 10))
+	respBody := resp.Body()
 
-	if a.chunked {
-		req.TransferEncoding = append(req.TransferEncoding, "chunked")
-	}
-
-	r, err := a.client.Do(req)
-	if err != nil {
-		return &res
-	}
-	defer r.Body.Close()
-
-	if !debug {
-		length, err := io.Copy(ioutil.Discard, r.Body)
-		if err != nil {
-			return &res
-		}
-		res.BytesIn = uint64(length)
-	} else {
-
-		if res.Body, err = ioutil.ReadAll(r.Body); err != nil {
-			return &res
-		}
-
+	res.BytesIn = uint64(len(respBody))
+	if debug {
 		res.ReqBody = string(tgt.Body)
-		res.RspBody = string(res.Body)
+		res.RspBody = string(respBody)
+		res.Headers = nil
 
-		res.BytesIn = uint64(len(res.Body))
-
-		res.Headers = r.Header
 	}
 
-	if req.ContentLength != -1 {
-		res.BytesOut = uint64(req.ContentLength)
+	if req.Header.ContentLength() != -1 {
+		res.BytesOut = uint64(req.Header.ContentLength())
 	}
 
-	if res.Code = uint16(r.StatusCode); res.Code < 200 || res.Code >= 400 {
-		res.Error = r.Status
+	if res.Code = uint16(resp.StatusCode()); res.Code < 200 || res.Code >= 400 {
+		res.Error = strconv.Itoa(resp.StatusCode())
 	}
-
 
 	return &res
+}
+
+func (a *DiyAttacker) Stop() {
+	select {
+	case <-a.stopch:
+		return
+	default:
+		close(a.stopch)
+	}
 }

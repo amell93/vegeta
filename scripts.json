@@ -1,18 +1,19 @@
 {
   "workers": 1,
   "maxWorkers": 10,
-  "duration": 20,
+  "duration": 1,
   "debug": false,
-  "rate": 20,
+  "rate": 2,
   "parameterFile": "./relays.txt",
-  "resultFile": "20tps.json",
+  "resultFile": "result.csv",
   "requests": [
     {
       "name": "diy1",
       "weight": 1,
+      "keepAlive": false,
       "target": {
         "method": "get",
-        "url": "http://10.39.59.129:8199/resource?relay={{.serverIp}}",
+        "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",
         "header": {
           "h1": [
             "v1"
@@ -24,9 +25,11 @@
     {
       "name": "diy2",
       "weight": 2,
+      "keepAlive": true,
       "target": {
         "method": "get",
-        "url": "http://10.39.59.129:8199/resource?relay={{.serverIp}}"
+        "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",
+        "body": "relay={{.serverIp}}:443"
       }
     }
   ]

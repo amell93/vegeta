@@ -363,8 +363,6 @@ func (a *Attacker) hit(tr Targeter, name string) *Result {
 	}()
 
 	if err = tr(&tgt); err != nil {
-		d := err.(DiyError)
-		fmt.Println("===========", d.Name)
 		a.Stop()
 		return &res
 	}
