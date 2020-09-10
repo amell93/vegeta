@@ -63,7 +63,7 @@ func DiyMaxWorkers(n uint64) func(*DiyAttacker) {
 
 type DiyTargeter func(*Target) (string, bool, error)
 
-func (a *DiyAttacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, debug bool) <-chan *Result {
+func (a *DiyAttacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, loopCounts int, debug bool) <-chan *Result {
 	var wg sync.WaitGroup
 
 	workers := a.workers
@@ -86,7 +86,8 @@ func (a *DiyAttacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, debug
 		began, count := time.Now(), uint64(0)
 		for {
 			elapsed := time.Since(began)
-			if du > 0 && elapsed > du {
+			//运行时间或者运作次数，完成一个即整体结束。
+			if (du > 0 && elapsed > du) || (loopCounts > 0 && count+1 > uint64(loopCounts)) {
 				return
 			}
 

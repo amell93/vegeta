@@ -97,8 +97,12 @@ func diyAttack(opts *diyAttackOpts) (err error) {
 	)
 
 	res := atk.DiyAttack(
-		tr, vegeta.ConstantPacer{Freq: sc.Rate, Per: time.Second},
-		time.Duration(sc.Duration)*time.Second, sc.Debug)
+		tr,
+		vegeta.ConstantPacer{Freq: sc.Rate, Per: time.Second},
+		time.Duration(sc.Duration)*time.Second,
+		sc.LoopCounts,
+		sc.Debug,
+	)
 	//enc := vegeta.NewCSVEncoder(out)
 
 	sig := make(chan os.Signal, 1)

@@ -16,6 +16,7 @@ type Script struct {
 	Duration        int       `json:"duration"`
 	Debug           bool      `json:"debug,omitempty"`
 	Rate            int       `json:"rate"`
+	LoopCounts      int       `json:"loopCounts"`
 	ParameterFile   string    `json:"parameterFile,omitempty"`
 	ResultFile      string    `json:"resultFile,omitempty"`
 	Requests        []Request `json:"requests"`
