@@ -91,8 +91,8 @@ func ParseScript(scriptFile string) *Script {
 			script.Requests[i].Name = DefaultName
 		}
 
-		if script.Requests[i].Weight == 0 {
-			fmt.Println("request: weight must exits and must greater than 0")
+		if script.Requests[i].Weight < 0 {
+			fmt.Println("request: weight cat't less than 0")
 			os.Exit(1)
 		}
 

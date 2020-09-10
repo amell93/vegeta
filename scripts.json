@@ -3,7 +3,7 @@
   "maxWorkers": 10,
   "duration": 1,
   "debug": false,
-  "rate": 2,
+  "rate": 4,
   "parameterFile": "./relays.txt",
   "resultFile": "result.csv",
   "requests": [
@@ -24,6 +24,16 @@
     },
     {
       "name": "diy2",
+      "weight": 0,
+      "disableKeepAlive": false,
+      "target": {
+        "method": "get",
+        "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",
+        "body": "relay={{.serverIp}}:443"
+      }
+    },
+    {
+      "name": "diy3",
       "weight": 2,
       "disableKeepAlive": false,
       "target": {
