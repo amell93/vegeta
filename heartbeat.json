@@ -1,17 +1,18 @@
 {
-  "workers": 80,
-  "maxWorkers": 100,
-  "duration": 1,
+  "workers": 10,
+  "maxWorkers": 10,
+  "duration": 60,
   "debug": true,
-  "rate": 1,
+  "rate": 0,
   "parameterFile": "./relays.txt",
+  "resultFile": "result.csv",
   "requests": [
     {
       "name": "heartbeat",
       "weight": 1,
       "target": {
         "method": "POST",
-        "url": "http://10.39.59.116:80/heartbeat/47.101.32.205:443",
+        "url": "http://47.103.106.14:9080/heartbeat/219.134.109.25:443",
 		"header": {
         	"X-API-Version": [
           		"1.0.0"

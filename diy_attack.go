@@ -129,6 +129,7 @@ run:
 		select {
 		case <-sig:
 			atk.Stop()
+			vegeta.Finish = true
 			break run
 		case <-ticks:
 			if err = clear(out); err != nil {
@@ -136,8 +137,10 @@ run:
 			} else if err = writeReport(rep, rc, out); err != nil {
 				return err
 			}
+			m.Reset()
 		case r, ok := <-res:
 			if !ok {
+				vegeta.Finish = true
 				break run
 			}
 
@@ -152,6 +155,8 @@ run:
 	}
 
 	clear(out)
+
+	m.Aggregate()
 
 	return writeReport(rep, rc, out)
 }

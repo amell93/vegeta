@@ -3,8 +3,7 @@
   "maxWorkers": 10,
   "duration": 10,
   "debug": false,
-  "rate": 4,
-  "loopCounts": 45,
+  "rate": 40,
   "parameterFile": "./relays.txt",
   "resultFile": "result.csv",
   "requests": [
