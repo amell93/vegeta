@@ -1,0 +1,65 @@
+# github.com/alecthomas/jsonschema v0.0.0-20180308105923-f2c93856175a
+github.com/alecthomas/jsonschema
+# github.com/andybalholm/brotli v1.0.0
+github.com/andybalholm/brotli
+# github.com/bmizerany/perks v0.0.0-20141205001514-d9a9656a3a4b
+github.com/bmizerany/perks/quantile
+# github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
+github.com/c2h5oh/datasize
+# github.com/dgryski/go-gk v0.0.0-20140819190930-201884a44051
+github.com/dgryski/go-gk
+# github.com/dgryski/go-lttb v0.0.0-20180810165845-318fcdf10a77
+github.com/dgryski/go-lttb
+# github.com/google/go-cmp v0.2.0
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
+# github.com/influxdata/tdigest v0.0.0-20180711151920-a7d76c6f093a
+github.com/influxdata/tdigest
+# github.com/klauspost/compress v1.10.7
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/zlib
+# github.com/mailru/easyjson v0.7.0
+github.com/mailru/easyjson
+github.com/mailru/easyjson/buffer
+github.com/mailru/easyjson/jlexer
+github.com/mailru/easyjson/jwriter
+# github.com/miekg/dns v1.1.17
+github.com/miekg/dns
+# github.com/streadway/quantile v0.0.0-20150917103942-b0c588724d25
+github.com/streadway/quantile
+# github.com/tsenart/go-tsz v0.0.0-20180814232043-cdeb9e1e981e
+github.com/tsenart/go-tsz
+github.com/tsenart/go-tsz/testdata
+# github.com/valyala/bytebufferpool v1.0.0
+github.com/valyala/bytebufferpool
+# github.com/valyala/fasthttp v1.16.0
+github.com/valyala/fasthttp
+github.com/valyala/fasthttp/fasthttputil
+github.com/valyala/fasthttp/stackless
+# golang.org/x/crypto v0.0.0-20190829043050-9756ffdc2472
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ed25519/internal/edwards25519
+# golang.org/x/net v0.0.0-20200602114024-627f9648deb9
+golang.org/x/net/bpf
+golang.org/x/net/http/httpguts
+golang.org/x/net/http2
+golang.org/x/net/http2/hpack
+golang.org/x/net/idna
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+# golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.2
+golang.org/x/text/secure/bidirule
+golang.org/x/text/transform
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm
+# pgregory.net/rapid v0.3.3
+pgregory.net/rapid

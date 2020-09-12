@@ -80,6 +80,24 @@ func (a *DiyAttacker) DiyAttack(tr DiyTargeter, p Pacer, du time.Duration, loopC
 
 	go func() {
 		defer close(results)
+
+		//该函数必须先将fasthttp.Client的m和ms进行导出变为M和Ms，还需要将fasthttp.HostClient的conns进行导出变为Conns
+		//所有goroutine请求结束后，关闭存活的所有net.Conn，以避免向server发送[RST,ACK]
+		//defer函数为后声明的先执行。所有该释放连接的函数必须在wg.Wait()之前声明。
+		//以保证所有持有net.Conn的goroutine运行结束。
+		defer func() {
+			for _, v := range a.client.M {
+				for index := range v.Conns {
+					_ = v.Conns[index].C.Close()
+				}
+			}
+			for _, v := range a.client.Ms {
+				for index := range v.Conns {
+					_ = v.Conns[index].C.Close()
+				}
+			}
+		}()
+
 		defer wg.Wait()
 		defer close(ticks)
 
@@ -178,7 +196,8 @@ func (a *DiyAttacker) diyHit(tr DiyTargeter, debug bool) *Result {
 
 	if disableKeepAlive {
 		//禁用keepAlive
-		req.Header.Add(fasthttp.HeaderConnection, "close")
+		//req.Header.Add(fasthttp.HeaderConnection, "close")
+		req.SetConnectionClose()
 	}
 
 	req.Header.Add("X-Vegeta-Attack", DefaultName)

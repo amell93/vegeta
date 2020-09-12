@@ -43,6 +43,7 @@ type diyTarget struct {
 	URL    string      `json:"url"`
 	Body   string      `json:"body,omitempty"`
 	Header http.Header `json:"header,omitempty"`
+	BodyBytes []byte
 }
 
 const (

@@ -1,9 +1,9 @@
 {
-  "workers": 1,
-  "maxWorkers": 10,
-  "duration": 10,
+  "workers": 2,
+  "maxWorkers": 2,
+  "duration": 2,
   "debug": false,
-  "rate": 40,
+  "rate": 2,
   "parameterFile": "./relays.txt",
   "resultFile": "result.csv",
   "requests": [
@@ -13,7 +13,7 @@
       "disableKeepAlive": false,
       "target": {
         "method": "get",
-        "url": "http://10.25.182.33:8199/resource?relay={{.serverIp}}",
+        "url": "http://www.baidu.com/",
         "header": {
           "h1": [
             "v1"
@@ -34,7 +34,7 @@
     },
     {
       "name": "diy3",
-      "weight": 2,
+      "weight": 0,
       "disableKeepAlive": false,
       "target": {
         "method": "get",

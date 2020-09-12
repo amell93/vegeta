@@ -3,7 +3,6 @@ package vegeta
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"strings"
 	"sync"
 	"text/template"
@@ -40,6 +39,8 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 			bodyTmp := template.Must(template.New(fmt.Sprintf("url_%d", i)).Parse(sc.Requests[i].DiyTarget.Body))
 			bodyTmpSli[i] = bodyTmp
 
+			sc.Requests[i].DiyTarget.BodyBytes = []byte(sc.Requests[i].DiyTarget.Body)
+
 		}
 
 		wCon := NewWeightedControl(sc)
@@ -48,26 +49,30 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 			if t == nil {
 				return DefaultName, false, ErrNilTarget
 			}
-			m := make(map[string]string)
-			rand := wCon.Rand()
-			sc.UpdateParaData(m)
 
-			data := bufferPool.Get().(*bytes.Buffer)
-			urlTmpSli[rand].Execute(data, m)
+			rand := wCon.Rand()
 			t.Method = strings.ToUpper(sc.Requests[rand].DiyTarget.Method)
-			t.URL = data.String()
-			t.Header = http.Header{}
 			if sc.Requests[rand].DiyTarget.Header != nil {
 				t.Header = sc.Requests[rand].DiyTarget.Header
 			}
 
-			data.Reset()
+			if sc.ParaExist {
+				m := make(map[string]string)
+				sc.UpdateParaData(m)
+				data := bufferPool.Get().(*bytes.Buffer)
+				urlTmpSli[rand].Execute(data, m)
+				t.URL = data.String()
+				data.Reset()
 
-			bodyTmpSli[rand].Execute(data, m)
-			t.Body = data.Bytes()
+				bodyTmpSli[rand].Execute(data, m)
+				t.Body = data.Bytes()
 
-			data.Reset()
-			bufferPool.Put(data)
+				data.Reset()
+				bufferPool.Put(data)
+			} else {
+				t.URL = sc.Requests[rand].DiyTarget.URL
+				t.Body = sc.Requests[rand].DiyTarget.BodyBytes
+			}
 
 			return sc.Requests[rand].Name, sc.Requests[rand].DisableKeepAlive, nil
 		}
