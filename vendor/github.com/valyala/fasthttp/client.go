@@ -295,8 +295,8 @@ type Client struct {
 	RetryIf RetryIfFunc
 
 	mLock sync.Mutex
-	M     map[string]*HostClient
-	Ms    map[string]*HostClient
+	m     map[string]*HostClient
+	ms    map[string]*HostClient
 }
 
 // Get returns the status code and body of url.
@@ -468,16 +468,16 @@ func (c *Client) Do(req *Request, resp *Response) error {
 	startCleaner := false
 
 	c.mLock.Lock()
-	m := c.M
+	m := c.m
 	if isTLS {
-		m = c.Ms
+		m = c.ms
 	}
 	if m == nil {
 		m = make(map[string]*HostClient)
 		if isTLS {
-			c.Ms = m
+			c.ms = m
 		} else {
-			c.M = m
+			c.m = m
 		}
 	}
 	hc := m[string(host)]
@@ -512,27 +512,39 @@ func (c *Client) Do(req *Request, resp *Response) error {
 	c.mLock.Unlock()
 
 	if startCleaner {
-		go c.mCleaner(m)
+		go c.mCleaner()
 	}
 
 	return hc.Do(req, resp)
 }
 
-func (c *Client) mCleaner(m map[string]*HostClient) {
+// CloseIdleConnections closes any connections which were previously
+// connected from previous requests but are now sitting idle in a
+// "keep-alive" state. It does not interrupt any connections currently
+// in use.
+func (c *Client) CloseIdleConnections() {
+	c.mLock.Lock()
+	for _, v := range c.m {
+		v.CloseIdleConnections()
+	}
+	c.mLock.Unlock()
+}
+
+func (c *Client) mCleaner() {
 	mustStop := false
 
 	for {
 		c.mLock.Lock()
-		for k, v := range m {
+		for k, v := range c.m {
 			v.connsLock.Lock()
 			shouldRemove := v.connsCount == 0
 			v.connsLock.Unlock()
 
 			if shouldRemove {
-				delete(m, k)
+				delete(c.m, k)
 			}
 		}
-		if len(m) == 0 {
+		if len(c.m) == 0 {
 			mustStop = true
 		}
 		c.mLock.Unlock()
@@ -723,7 +735,7 @@ type HostClient struct {
 
 	connsLock  sync.Mutex
 	connsCount int
-	Conns      []*clientConn
+	conns      []*clientConn
 	connsWait  *wantConnQueue
 
 	addrsLock sync.Mutex
@@ -742,7 +754,7 @@ type HostClient struct {
 }
 
 type clientConn struct {
-	C net.Conn
+	c net.Conn
 
 	createdTime time.Time
 	lastUseTime time.Time
@@ -1306,7 +1318,7 @@ func (c *HostClient) doNonNilReqResp(req *Request, resp *Response) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	conn := cc.C
+	conn := cc.c
 
 	resp.parseNetConn(conn)
 
@@ -1435,7 +1447,7 @@ func (c *HostClient) acquireConn(reqTimeout time.Duration) (cc *clientConn, err 
 
 	var n int
 	c.connsLock.Lock()
-	n = len(c.Conns)
+	n = len(c.conns)
 	if n == 0 {
 		maxConns := c.MaxConns
 		if maxConns <= 0 {
@@ -1451,9 +1463,9 @@ func (c *HostClient) acquireConn(reqTimeout time.Duration) (cc *clientConn, err 
 		}
 	} else {
 		n--
-		cc = c.Conns[n]
-		c.Conns[n] = nil
-		c.Conns = c.Conns[:n]
+		cc = c.conns[n]
+		c.conns[n] = nil
+		c.conns = c.conns[:n]
 	}
 	c.connsLock.Unlock()
 
@@ -1545,6 +1557,24 @@ func (c *HostClient) dialConnFor(w *wantConn) {
 	}
 }
 
+// CloseIdleConnections closes any connections which were previously
+// connected from previous requests but are now sitting idle in a
+// "keep-alive" state. It does not interrupt any connections currently
+// in use.
+func (c *HostClient) CloseIdleConnections() {
+	c.connsLock.Lock()
+	scratch := append([]*clientConn{}, c.conns...)
+	for i := range c.conns {
+		c.conns[i] = nil
+	}
+	c.conns = c.conns[:0]
+	c.connsLock.Unlock()
+
+	for _, cc := range scratch {
+		c.closeConn(cc)
+	}
+}
+
 func (c *HostClient) connsCleaner() {
 	var (
 		scratch             []*clientConn
@@ -1558,7 +1588,7 @@ func (c *HostClient) connsCleaner() {
 
 		// Determine idle connections to be closed.
 		c.connsLock.Lock()
-		conns := c.Conns
+		conns := c.conns
 		n := len(conns)
 		i := 0
 		for i < n && currentTime.Sub(conns[i].lastUseTime) > maxIdleConnDuration {
@@ -1576,7 +1606,7 @@ func (c *HostClient) connsCleaner() {
 			for i = m; i < n; i++ {
 				conns[i] = nil
 			}
-			c.Conns = conns[:m]
+			c.conns = conns[:m]
 		}
 		c.connsLock.Unlock()
 
@@ -1603,7 +1633,7 @@ func (c *HostClient) connsCleaner() {
 
 func (c *HostClient) closeConn(cc *clientConn) {
 	c.decConnsCount()
-	cc.C.Close()
+	cc.c.Close()
 	releaseClientConn(cc)
 }
 
@@ -1640,7 +1670,7 @@ func acquireClientConn(conn net.Conn) *clientConn {
 		v = &clientConn{}
 	}
 	cc := v.(*clientConn)
-	cc.C = conn
+	cc.c = conn
 	cc.createdTime = time.Now()
 	return cc
 }
@@ -1657,7 +1687,7 @@ func (c *HostClient) releaseConn(cc *clientConn) {
 	cc.lastUseTime = time.Now()
 	if c.MaxConnWaitTimeout <= 0 {
 		c.connsLock.Lock()
-		c.Conns = append(c.Conns, cc)
+		c.conns = append(c.conns, cc)
 		c.connsLock.Unlock()
 		return
 	}
@@ -1676,7 +1706,7 @@ func (c *HostClient) releaseConn(cc *clientConn) {
 		}
 	}
 	if !delivered {
-		c.Conns = append(c.Conns, cc)
+		c.conns = append(c.conns, cc)
 	}
 }
 

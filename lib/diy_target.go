@@ -65,7 +65,10 @@ func NewWeightTargeter(scriptFile string) (DiyTargeter, *Script) {
 				data.Reset()
 
 				bodyTmpSli[rand].Execute(data, m)
-				t.Body = data.Bytes()
+				bodyLen := data.Len()
+				bodySli := make([]byte, bodyLen)
+				copy(bodySli, data.Bytes())
+				t.Body = bodySli
 
 				data.Reset()
 				bufferPool.Put(data)
