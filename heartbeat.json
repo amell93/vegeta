@@ -1,11 +1,11 @@
 {
   "workers": 10,
   "maxWorkers": 10,
-  "duration": 600,
+  "duration": 10,
   "debug": true,
-  "rate": 20,
+  "rate": 5,
   "parameterFile": "./relays.txt",
-  "resultFile": "result.csv",
+  "resultFile": "result.json",
   "requests": [
     {
       "name": "heartbeat",

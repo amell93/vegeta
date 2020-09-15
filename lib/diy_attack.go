@@ -206,8 +206,12 @@ func (a *DiyAttacker) diyHit(tr DiyTargeter, debug bool) *Result {
 		res.BytesOut = uint64(req.Header.ContentLength())
 	}
 
+	//assert
 	if res.Code = uint16(resp.StatusCode()); res.Code < 200 || res.Code >= 400 {
-		res.Error = strconv.Itoa(resp.StatusCode())
+		res.Error = fasthttp.StatusMessage(resp.StatusCode())
+	} else {
+		//默认状态码>=200 && < 400时为true
+		res.Success = true
 	}
 
 	return &res

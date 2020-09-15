@@ -20,7 +20,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(in *jlexer.Lexer, out *jsonResult) {
+func easyjsonBd1621b8DecodeTestVegeta(in *jlexer.Lexer, out *jsonResult) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -45,6 +45,8 @@ func easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(in *jlexer.Lexer, out *j
 			out.Seq = uint64(in.Uint64())
 		case "code":
 			out.Code = uint16(in.Uint16())
+		case "success":
+			out.Success = bool(in.Bool())
 		case "timestamp":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Timestamp).UnmarshalJSON(data))
@@ -77,11 +79,7 @@ func easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(in *jlexer.Lexer, out *j
 				in.Skip()
 			} else {
 				in.Delim('{')
-				if !in.IsDelim('}') {
-					out.Headers = make(http.Header)
-				} else {
-					out.Headers = nil
-				}
+				out.Headers = make(http.Header)
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
@@ -123,7 +121,7 @@ func easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(in *jlexer.Lexer, out *j
 		in.Consumed()
 	}
 }
-func easyjsonBd1621b8EncodeGithubComTsenartVegetaV12Lib(out *jwriter.Writer, in jsonResult) {
+func easyjsonBd1621b8EncodeTestVegeta(out *jwriter.Writer, in jsonResult) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -141,6 +139,11 @@ func easyjsonBd1621b8EncodeGithubComTsenartVegetaV12Lib(out *jwriter.Writer, in 
 		const prefix string = ",\"code\":"
 		out.RawString(prefix)
 		out.Uint16(uint16(in.Code))
+	}
+	{
+		const prefix string = ",\"success\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.Success))
 	}
 	{
 		const prefix string = ",\"timestamp\":"
@@ -229,10 +232,10 @@ func easyjsonBd1621b8EncodeGithubComTsenartVegetaV12Lib(out *jwriter.Writer, in 
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v jsonResult) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBd1621b8EncodeGithubComTsenartVegetaV12Lib(w, v)
+	easyjsonBd1621b8EncodeTestVegeta(w, v)
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *jsonResult) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBd1621b8DecodeGithubComTsenartVegetaV12Lib(l, v)
+	easyjsonBd1621b8DecodeTestVegeta(l, v)
 }
